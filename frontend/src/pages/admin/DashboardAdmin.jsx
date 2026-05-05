@@ -13,9 +13,20 @@ function DashboardAdmin() {
   useEffect(() => {
     const chargerStats = async () => {
       try {
+        // 1. Récupérer manuellement le token stocké localement
+        const token = localStorage.getItem('token'); 
+        
+        // 2. Configurer les en-têtes d'autorisation
+        const config = {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        };
+
+        // 3. Passer la configuration à la requête des inscriptions
         const [certifs, enrollments] = await Promise.all([
           api.get('/certifications'),
-          api.get('/enrollments')
+          api.get('/enrollments', config) // 💡 Token injecté ici pour Laravel
         ]);
 
         const etudiantsUniques = new Set(
@@ -27,8 +38,9 @@ function DashboardAdmin() {
           totalEtudiants: etudiantsUniques,
           totalInscriptions: enrollments.data.length,
         });
-      } catch {
-        // En cas d'erreur, les stats restent à 0
+      } catch (error) {
+        // Affiche l'erreur en console pour vous aider à débugger au besoin
+        console.error("Erreur API:", error.response || error);
       } finally {
         setChargement(false);
       }
