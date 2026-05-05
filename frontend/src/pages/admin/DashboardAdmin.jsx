@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import axios from 'axios'; // 💡 Ajout d'axios direct
 import api from '../../services/api';
 
 function DashboardAdmin() {
@@ -23,10 +24,11 @@ function DashboardAdmin() {
           }
         };
 
-        // 3. Envoi des requêtes en parallèle avec les autorisations
+        // 3. Envoi des requêtes en parallèle 
+        // 💡 On force l'adresse absolue avec le "/" à la fin pour casser le bug 405
         const [certifs, enrollments] = await Promise.all([
           api.get('/certifications'),
-          api.get('/enrollments', config) // 💡 Token injecté ici
+          axios.get('http://localhost:8000/api/enrollments/', config) 
         ]);
 
         const etudiantsUniques = new Set(
