@@ -20,6 +20,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/enrollments', [EnrollmentController::class, 'store']);
     Route::get('/my-enrollments', [EnrollmentController::class, 'myEnrollments']);
     Route::get('/dashboard/student', [StudentController::class, 'dashboard']);
+    
+    // ✅ Déplacé ici : accessible à tout utilisateur connecté
+    Route::get('/enrollments', [EnrollmentController::class, 'index']); 
 
     // Routes admin uniquement
     Route::middleware('isAdmin')->group(function () {
@@ -28,6 +31,5 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/certifications/{id}', [CertificationController::class, 'destroy']);
         Route::post('/certifications/{id}/photo', [CertificationController::class, 'uploadPhoto']);
         Route::get('/dashboard/admin', [AdminController::class, 'dashboard']);
-        Route::get('/enrollments', [EnrollmentController::class, 'index']); // ✅ Nouveau
     });
 });
