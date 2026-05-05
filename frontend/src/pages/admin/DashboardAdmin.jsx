@@ -15,7 +15,7 @@ function DashboardAdmin() {
       try {
         const [certifs, enrollments] = await Promise.all([
           api.get('/certifications'),
-          api.get('/my-enrollments'), // ✅ Correction ici
+          api.get('/enrollments')
         ]);
 
         const etudiantsUniques = new Set(
