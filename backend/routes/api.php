@@ -8,14 +8,14 @@ use App\Http\Controllers\StudentController;
 use Illuminate\Support\Facades\Route;
 
 // --------------------------------------------------------------------
-// 1. Routes Publiques (Accessibles sans connexion)
+// Routes Publiques
 // --------------------------------------------------------------------
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/certifications', [CertificationController::class, 'index']);
 
 // --------------------------------------------------------------------
-// 2. Routes Protégées (Utilisateurs connectés via Sanctum)
+// Routes Protégées (Utilisateurs connectés)
 // --------------------------------------------------------------------
 Route::middleware('auth:sanctum')->group(function () {
     
@@ -31,11 +31,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/dashboard/student', [StudentController::class, 'dashboard']);
     
     // ----------------------------------------------------------------
-    // 3. Sous-groupe : Routes réservées aux Administrateurs
+    // Routes Admin uniquement (via le middleware isAdmin)
     // ----------------------------------------------------------------
     Route::middleware('isAdmin')->group(function () {
-        // C'est cette route que ton React cherche en GET !
-        Route::get('/enrollments', [EnrollmentController::class, 'index']); 
+        // Nouvelle URL propre pour l'admin, sans conflit
+        Route::get('/admin/enrollments', [EnrollmentController::class, 'index']); 
 
         // Gestion des certifications
         Route::post('/certifications', [CertificationController::class, 'store']);
