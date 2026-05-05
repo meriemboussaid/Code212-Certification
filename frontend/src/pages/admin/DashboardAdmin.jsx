@@ -13,13 +13,11 @@ function DashboardAdmin() {
   useEffect(() => {
     const chargerStats = async () => {
       try {
-        // On fait 3 appels en parallèle avec Promise.all pour aller plus vite
         const [certifs, enrollments] = await Promise.all([
           api.get('/certifications'),
-          api.get('/enrollments'),
+          api.get('/my-enrollments'), // ✅ Correction ici
         ]);
 
-        // On déduit le nombre d'étudiants uniques à partir des inscriptions
         const etudiantsUniques = new Set(
           enrollments.data.map((e) => e.user_id)
         ).size;
@@ -35,6 +33,7 @@ function DashboardAdmin() {
         setChargement(false);
       }
     };
+
     chargerStats();
   }, []);
 
@@ -45,7 +44,6 @@ function DashboardAdmin() {
         <p>Gestion de la plateforme Code 212</p>
       </div>
 
-      {/* Cartes de statistiques */}
       <div className="stats-grid">
         <div className="stat-card">
           <span className="stat-number">
@@ -67,7 +65,6 @@ function DashboardAdmin() {
         </div>
       </div>
 
-      {/* Actions rapides */}
       <div className="section">
         <h2>Actions rapides</h2>
         <div className="actions-grid">
