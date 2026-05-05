@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import api from '../services/api';
+import axios from 'axios';
 
 // On crée le contexte — c'est le "conteneur" partagé entre tous les composants
 const AuthContext = createContext(null);
@@ -11,11 +12,10 @@ export function AuthProvider({ children }) {
   // true pendant qu'on vérifie si l'utilisateur est déjà connecté
   const [loading, setLoading] = useState(true);
 
-  // Au démarrage de l'app, on vérifie si un token existe déjà dans le navigateur
+  // Au démarrage de l'app, on vérifie si l'utilisateur est déjà connecté
   useEffect(() => {
-    const token = localStorage.getItem('token');
     const savedUser = localStorage.getItem('user');
-    if (token && savedUser) {
+    if (savedUser) {
       setUser(JSON.parse(savedUser));
     }
     setLoading(false);
@@ -23,10 +23,14 @@ export function AuthProvider({ children }) {
 
   // Fonction appelée quand l'utilisateur se connecte
   const login = async (email, password) => {
+    // 1. Demander le cookie CSRF
+    await axios.get('http://localhost:8000/sanctum/csrf-cookie', {
+      withCredentials: true
+    });
+    // 2. Se connecter
     const response = await api.post('/login', { email, password });
-    const { token, user: userData } = response.data;
-    // On sauvegarde le token et l'utilisateur dans le navigateur (persiste après rechargement)
-    localStorage.setItem('token', token);
+    const { user: userData } = response.data;
+    // On sauvegarde uniquement l'utilisateur (l'authentification se fait via cookie)
     localStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);
     return userData;
@@ -34,14 +38,18 @@ export function AuthProvider({ children }) {
 
   // Fonction appelée quand l'utilisateur s'inscrit
   const register = async (name, email, password, passwordConfirmation) => {
+    // 1. Demander le cookie CSRF
+    await axios.get('http://localhost:8000/sanctum/csrf-cookie', {
+      withCredentials: true
+    });
+    // 2. S'inscrire
     const response = await api.post('/register', {
       name,
       email,
       password,
       password_confirmation: passwordConfirmation,
     });
-    const { token, user: userData } = response.data;
-    localStorage.setItem('token', token);
+    const { user: userData } = response.data;
     localStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);
     return userData;
@@ -54,7 +62,6 @@ export function AuthProvider({ children }) {
     } catch {
       // même si l'API échoue, on déconnecte quand même côté frontend
     }
-    localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
   };
