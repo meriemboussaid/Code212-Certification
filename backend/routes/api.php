@@ -1,5 +1,4 @@
 <?php
-
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CertificationController;
@@ -12,7 +11,7 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/certifications', [CertificationController::class, 'index']);
 
-// Routes protégées (session + cookie)
+// Routes protégées
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
@@ -29,5 +28,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/certifications/{id}', [CertificationController::class, 'destroy']);
         Route::post('/certifications/{id}/photo', [CertificationController::class, 'uploadPhoto']);
         Route::get('/dashboard/admin', [AdminController::class, 'dashboard']);
+        Route::get('/enrollments', [EnrollmentController::class, 'index']); // ✅ Nouveau
     });
 });
