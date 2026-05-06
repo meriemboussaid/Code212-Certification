@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
@@ -27,11 +26,11 @@ class AuthController extends Controller
             'role'     => $validated['role'] ?? 'student',
         ]);
 
-        Auth::guard('web')->login($user);
-        $request->session()->regenerate();
+        $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
             'message' => 'Inscription réussie.',
+            'token'   => $token,
             'user'    => $user,
         ], 201);
     }
@@ -43,33 +42,32 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        if (!Auth::guard('web')->attempt(['email' => $validated['email'], 'password' => $validated['password']])) {
+        $user = User::where('email', $validated['email'])->first();
+
+        if (!$user || !Hash::check($validated['password'], $user->password)) {
             throw ValidationException::withMessages([
                 'email' => ['Les identifiants sont incorrects.'],
             ]);
         }
 
-        $request->session()->regenerate();
+        $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
             'message' => 'Connexion réussie.',
-            'user'    => Auth::guard('web')->user(),
+            'token'   => $token,
+            'user'    => $user,
         ]);
     }
 
     public function logout(Request $request)
     {
-        Auth::guard('web')->logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
+        $request->user()->currentAccessToken()->delete();
         return response()->json(['message' => 'Déconnexion réussie.']);
     }
 
     public function me(Request $request)
     {
         $user = $request->user();
-
         return response()->json([
             'user' => [
                 'id'    => $user->id,
@@ -91,17 +89,9 @@ class AuthController extends Controller
             'password_confirmation' => 'required_with:password',
         ]);
 
-        if (isset($validated['name'])) {
-            $user->name = $validated['name'];
-        }
-
-        if (isset($validated['email'])) {
-            $user->email = $validated['email'];
-        }
-
-        if (isset($validated['password'])) {
-            $user->password = Hash::make($validated['password']);
-        }
+        if (isset($validated['name'])) $user->name = $validated['name'];
+        if (isset($validated['email'])) $user->email = $validated['email'];
+        if (isset($validated['password'])) $user->password = Hash::make($validated['password']);
 
         $user->save();
 
