@@ -5,17 +5,16 @@ import api from '../../services/api';
 
 function DashboardEtudiant() {
   const { user } = useAuth();
-  // Mes inscriptions aux certifications
   const [inscriptions, setInscriptions] = useState([]);
   const [chargement, setChargement] = useState(true);
   const [erreur, setErreur] = useState('');
 
-  // useEffect s'exécute une seule fois au chargement du composant
   useEffect(() => {
     const chargerInscriptions = async () => {
       try {
-        const response = await api.get('/enrollments/my');
-        setInscriptions(response.data);
+        const response = await api.get('/my-enrollments'); // ✅ Correction
+        const liste = response.data.enrollments || response.data;
+        setInscriptions(liste);
       } catch {
         setErreur('Impossible de charger vos inscriptions');
       } finally {
@@ -23,9 +22,8 @@ function DashboardEtudiant() {
       }
     };
     chargerInscriptions();
-  }, []); // [] = ne s'exécute qu'une fois (au montage du composant)
+  }, []);
 
-  // Calcul du nombre d'inscriptions actives
   const inscriptionsActives = inscriptions.filter(
     (i) => i.statut === 'actif' || i.statut === 'inscrit'
   ).length;
@@ -37,7 +35,6 @@ function DashboardEtudiant() {
         <p>Bienvenue sur votre tableau de bord Code 212</p>
       </div>
 
-      {/* Cartes de statistiques */}
       <div className="stats-grid">
         <div className="stat-card">
           <span className="stat-number">{inscriptions.length}</span>
@@ -53,7 +50,6 @@ function DashboardEtudiant() {
         </div>
       </div>
 
-      {/* Liste des inscriptions récentes */}
       <div className="section">
         <div className="section-header">
           <h2>Mes certifications</h2>
@@ -88,7 +84,6 @@ function DashboardEtudiant() {
                     Inscrit le {new Date(inscription.date_inscription).toLocaleDateString('fr-FR')}
                   </span>
                 </div>
-                {/* Afficher le résultat si disponible */}
                 {inscription.result && (
                   <div className="result-info">
                     <strong>Note : {inscription.result.score}/100</strong>

@@ -22,83 +22,61 @@ import './App.css';
 
 function App() {
   return (
-    // BrowserRouter active la navigation dans l'application
     <BrowserRouter>
-      {/* AuthProvider partage l'état de connexion à toute l'app */}
       <AuthProvider>
-        {/* La navbar s'affiche sur toutes les pages (elle se cache si non connecté) */}
         <Navbar />
-
         <main className="main-content">
           <Routes>
-            {/* Redirection de la racine vers /login */}
             <Route path="/" element={<Navigate to="/login" replace />} />
-
-            {/* Pages publiques (accessibles sans être connecté) */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
 
-            {/* Pages étudiant (réservées aux utilisateurs avec role='etudiant') */}
-            <Route
-              path="/etudiant/dashboard"
-              element={
-                <PrivateRoute roleRequis="etudiant">
+            {/* Pages étudiant */}
+            <Route path="/etudiant/dashboard" element={
+                <PrivateRoute roleRequis="student">
                   <DashboardEtudiant />
                 </PrivateRoute>
               }
             />
-            <Route
-              path="/etudiant/certifications"
-              element={
-                <PrivateRoute roleRequis="etudiant">
+            <Route path="/etudiant/certifications" element={
+                <PrivateRoute roleRequis="student">
                   <CertificationsEtudiant />
                 </PrivateRoute>
               }
             />
-            <Route
-              path="/etudiant/profil"
-              element={
-                <PrivateRoute roleRequis="etudiant">
+            <Route path="/etudiant/profil" element={
+                <PrivateRoute roleRequis="student">
                   <Profil />
                 </PrivateRoute>
               }
             />
 
-            {/* Pages admin (réservées aux utilisateurs avec role='admin') */}
-            <Route
-              path="/admin/dashboard"
-              element={
+            {/* Pages admin */}
+            <Route path="/admin/dashboard" element={
                 <PrivateRoute roleRequis="admin">
                   <DashboardAdmin />
                 </PrivateRoute>
               }
             />
-            <Route
-              path="/admin/certifications"
-              element={
+            <Route path="/admin/certifications" element={
                 <PrivateRoute roleRequis="admin">
                   <GestionCertifications />
                 </PrivateRoute>
               }
             />
-            <Route
-              path="/admin/etudiants"
-              element={
+            <Route path="/admin/etudiants" element={
                 <PrivateRoute roleRequis="admin">
                   <GestionEtudiants />
                 </PrivateRoute>
               }
             />
-            <Route
-              path="/admin/notes"
-              element={
+            <Route path="/admin/notes" element={
                 <PrivateRoute roleRequis="admin">
                   <SaisieNotes />
                 </PrivateRoute>
               }
             />
 
-            {/* Page 404 : toute URL inconnue → retour au login */}
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
         </main>
