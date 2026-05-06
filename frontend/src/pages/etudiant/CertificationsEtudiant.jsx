@@ -11,13 +11,13 @@ function CertificationsEtudiant() {
   useEffect(() => {
     const chargerDonnees = async () => {
       try {
-        // On charge les certifications disponibles ET mes inscriptions en parallèle
         const [resCertifs, resInscriptions] = await Promise.all([
           api.get('/certifications'),
-          api.get('/enrollments/my'),
+          api.get('/my-enrollments'), // ✅ Correction
         ]);
         setCertifications(resCertifs.data);
-        setMesInscriptions(resInscriptions.data);
+        const liste = resInscriptions.data.enrollments || resInscriptions.data;
+        setMesInscriptions(liste);
       } catch {
         setErreur('Impossible de charger les certifications');
       } finally {
@@ -27,25 +27,21 @@ function CertificationsEtudiant() {
     chargerDonnees();
   }, []);
 
-  // Vérifie si l'étudiant est déjà inscrit à une certification
   const estInscrit = (certifId) =>
     mesInscriptions.some((i) => i.certification_id === certifId);
 
   const sInscrire = async (certifId) => {
-    // Vérification : max 3 inscriptions
     if (mesInscriptions.length >= 3) {
       setErreur('Vous ne pouvez pas vous inscrire à plus de 3 certifications');
       return;
     }
-
     try {
       await api.post('/enrollments', { certification_id: certifId });
-      // Recharger les inscriptions après la nouvelle inscription
-      const res = await api.get('/enrollments/my');
-      setMesInscriptions(res.data);
+      const res = await api.get('/my-enrollments'); // ✅ Correction
+      const liste = res.data.enrollments || res.data;
+      setMesInscriptions(liste);
       setMessageSucces('Inscription réussie !');
       setErreur('');
-      // Le message disparaît après 3 secondes
       setTimeout(() => setMessageSucces(''), 3000);
     } catch (err) {
       setErreur(err.response?.data?.message || 'Erreur lors de l\'inscription');

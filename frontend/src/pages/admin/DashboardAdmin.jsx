@@ -17,14 +17,24 @@ function DashboardAdmin() {
           api.get('/certifications'),
           api.get('/admin/enrollments'),
         ]);
-        const liste = enrollments.data.enrollments || enrollments.data;
-        const etudiantsUniques = new Set(liste.map((e) => e.user_id)).size;
+        
+        const listeBrute = enrollments.data.enrollments || enrollments.data;
+        
+        // CORRECTION : On exclut le Super Admin des statistiques
+        const listeFiltree = listeBrute.filter(
+          (e) => e.user?.name !== "Super Admin"
+        );
+        
+        // On calcule le nombre d'étudiants uniques à partir de la liste nettoyée
+        const etudiantsUniques = new Set(listeFiltree.map((e) => e.user_id)).size;
+        
         setStats({
           totalCertifications: certifs.data.length,
           totalEtudiants: etudiantsUniques,
-          totalInscriptions: liste.length,
+          totalInscriptions: listeFiltree.length,
         });
       } catch {
+        // En cas d'erreur, on évite le plantage
       } finally {
         setChargement(false);
       }

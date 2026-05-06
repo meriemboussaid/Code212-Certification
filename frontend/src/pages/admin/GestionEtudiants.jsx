@@ -10,8 +10,16 @@ function GestionEtudiants() {
   useEffect(() => {
     const chargerInscriptions = async () => {
       try {
-        const response = await api.get('/enrollments');
-        setInscriptions(response.data);
+        const response = await api.get('/admin/enrollments');
+        const liste = response.data.enrollments || response.data;
+        
+        // CORRECTION 1 : On filtre directement ici pour exclure le "Super Admin" de TOUTE l'application
+        // Ainsi, le compteur global affichera le vrai nombre d'étudiants (ex: 1 au lieu de 3)
+        const vraisEtudiants = liste.filter(
+          (inscription) => inscription.user?.name !== "Super Admin"
+        );
+        
+        setInscriptions(vraisEtudiants);
       } catch {
         setErreur('Impossible de charger les inscriptions');
       } finally {
@@ -21,7 +29,7 @@ function GestionEtudiants() {
     chargerInscriptions();
   }, []);
 
-  // Filtrage en temps réel : on cherche dans le nom et l'email de l'étudiant
+  // Filtrage pour la barre de recherche
   const inscriptionsFiltrees = inscriptions.filter((inscription) => {
     const terme = recherche.toLowerCase();
     return (
@@ -30,12 +38,24 @@ function GestionEtudiants() {
     );
   });
 
+  // CORRECTION 2 : Fonction de sécurité pour éviter le bug "Invalid Date"
+  const formaterDate = (dateString) => {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    // Si la date reçue du backend est invalide, on affiche un tiret à la place de l'erreur
+    if (isNaN(date.getTime())) {
+      return '-';
+    }
+    return date.toLocaleDateString('fr-FR');
+  };
+
   if (chargement) return <div className="chargement">Chargement...</div>;
 
   return (
     <div className="page-container">
       <div className="page-header">
-        <h1>Gestion des étudiants</h1>
+        <h1>Gestion des etudiants</h1>
+        {/* Le compteur affiche maintenant uniquement les vrais étudiants */}
         <p>{inscriptions.length} inscription(s) au total</p>
       </div>
 
@@ -51,12 +71,12 @@ function GestionEtudiants() {
       </div>
 
       {inscriptionsFiltrees.length === 0 ? (
-        <p>Aucun étudiant trouvé.</p>
+        <p>Aucun etudiant trouve.</p>
       ) : (
         <table className="tableau">
           <thead>
             <tr>
-              <th>Étudiant</th>
+              <th>Etudiant</th>
               <th>Email</th>
               <th>Certification</th>
               <th>Date inscription</th>
@@ -70,18 +90,17 @@ function GestionEtudiants() {
                 <td>{inscription.user?.name}</td>
                 <td>{inscription.user?.email}</td>
                 <td>{inscription.certification?.titre}</td>
-                <td>
-                  {new Date(inscription.date_inscription).toLocaleDateString('fr-FR')}
-                </td>
+                {/* Utilisation de notre fonction de sécurité pour la date */}
+                <td>{formaterDate(inscription.date_inscription)}</td>
                 <td>
                   <span className={`badge badge-${inscription.statut}`}>
-                    {inscription.statut}
+                    {inscription.statut || '-'}
                   </span>
                 </td>
                 <td>
                   {inscription.result
-                    ? `${inscription.result.score}/100 — ${inscription.result.mention}`
-                    : '—'}
+                    ? `${inscription.result.score}/100`
+                    : '-'}
                 </td>
               </tr>
             ))}
