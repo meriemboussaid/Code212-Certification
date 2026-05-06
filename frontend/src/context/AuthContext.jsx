@@ -17,6 +17,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = async (email, password) => {
+    await api.get('/sanctum/csrf-cookie', { baseURL: 'http://localhost:8000' });
     const response = await api.post('/login', { email, password });
     const { token, user: userData } = response.data;
     localStorage.setItem('token', token);
@@ -26,6 +27,7 @@ export function AuthProvider({ children }) {
   };
 
   const register = async (name, email, password, passwordConfirmation) => {
+    await api.get('/sanctum/csrf-cookie', { baseURL: 'http://localhost:8000' });
     const response = await api.post('/register', {
       name,
       email,
