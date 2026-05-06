@@ -1,20 +1,21 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useContext, useState } from 'react';
 import api from '../services/api';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
+  const [user, setUser] = useState(() => {
     const token = localStorage.getItem('token');
     const savedUser = localStorage.getItem('user');
-    if (token && savedUser) {
-      setUser(JSON.parse(savedUser));
+
+    if (!token || !savedUser) {
+      return null;
     }
-    setLoading(false);
-  }, []);
+
+    return JSON.parse(savedUser);
+  });
+  const [loading] = useState(false);
 
   const login = async (email, password) => {
     await api.get('/sanctum/csrf-cookie', { baseURL: 'http://localhost:8000' });
@@ -44,7 +45,9 @@ export function AuthProvider({ children }) {
   const logout = async () => {
     try {
       await api.post('/logout');
-    } catch {}
+    } catch (error) {
+      console.warn('Logout request failed, clearing local session anyway.', error);
+    }
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
