@@ -15,7 +15,7 @@ function DashboardAdmin() {
       try {
         const [certifs, enrollments] = await Promise.all([
           api.get('/certifications'),
-          api.get('/enrollments'),
+          api.get('/admin/enrollments'),
         ]);
         const liste = enrollments.data.enrollments || enrollments.data;
         const etudiantsUniques = new Set(liste.map((e) => e.user_id)).size;
@@ -25,7 +25,6 @@ function DashboardAdmin() {
           totalInscriptions: liste.length,
         });
       } catch {
-        // stats restent à 0
       } finally {
         setChargement(false);
       }
