@@ -4,7 +4,7 @@ Laravel API for the Code212 certification platform. It handles authentication, c
 
 ## Demonstration
 
-[Voir la video de demonstration](https://drive.google.com/file/d/1pVL534JUIRAVPu7ijRYEpIHO26tibV0a/view?usp=sharing)
+[Voir la video de demonstration](https://youtu.be/ATm0jzJGaf0)
 
 ## Requirements
 
