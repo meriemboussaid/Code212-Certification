@@ -2,6 +2,10 @@
 
 Laravel API for the Code212 certification platform. It handles authentication, certifications, student enrollments, admin dashboards, and photo uploads for users and certifications.
 
+## Demonstration
+
+[Voir la video de demonstration](LIEN_DE_TA_VIDEO_ICI)
+
 ## Requirements
 
 - PHP 8.1 or newer
